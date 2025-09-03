@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:loan_application/ui/loan_application_screen.dart';
+import 'package:loan_application/ui/sms_chatbot_screen.dart';
 //import 'package:flutter_localizations/flutter_localizations.dart';
 
 class HomeDashboardScreen extends StatelessWidget {
@@ -124,7 +125,17 @@ class HomeDashboardScreen extends StatelessWidget {
                     ),
                   ),
                   padding: EdgeInsets.all(16),
-                  child: Icon(Icons.mic, size: 48, color: Color(0xFF6A5AE0)),
+                  child: IconButton(
+                    icon: Icon(Icons.mic, size: 48, color: Color(0xFF6A5AE0)),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => SMSChatbotScreen(),
+                        ),
+                      );
+                    },
+                  ),
                 ),
                 SizedBox(height: 12),
                 Text(
