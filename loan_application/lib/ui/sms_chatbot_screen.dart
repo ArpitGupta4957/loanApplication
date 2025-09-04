@@ -44,15 +44,17 @@ class _SMSChatbotScreenState extends State<SMSChatbotScreen> {
   void initState() {
     super.initState();
     _speech = stt.SpeechToText();
-    _initializeChat();
+    // Get phone number from previous screen or global state
+    final phoneNumber =
+        ModalRoute.of(context)?.settings.arguments as String? ?? 'user-id';
+    _initializeChat(phoneNumber);
   }
 
-  Future<void> _initializeChat() async {
-    final userId = 'user-id'; // Replace with actual user id
+  Future<void> _initializeChat(String userId) async {
     final token = await getStreamToken(userId);
     if (token != null) {
       await _client.connectUser(
-        User(id: userId, extraData: {'name': 'User'}),
+        User(id: userId, extraData: {'name': userId}),
         token,
       );
       _channel = _client.channel(
