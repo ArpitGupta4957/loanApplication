@@ -6,8 +6,10 @@ list(APPEND FLUTTER_PLUGIN_LIST
   connectivity_plus
   desktop_drop
   file_selector_windows
+  gal
   local_auth_windows
   media_kit_video
+  record_windows
   share_plus
   speech_to_text_windows
   thumblr_windows
