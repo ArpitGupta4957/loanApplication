@@ -1,25 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
-import 'package:image_picker/image_picker.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-Future<String?> getStreamToken(String userId) async {
-  final url = Uri.parse('http://localhost:3000/get-stream-token');
+Future<String> getGeminiResponse(String prompt) async {
+  final apiKey = 'AIzaSyCw9higWfGushNfAULTpY_pB2LmWWQ4Uew';
+  final url = Uri.parse(
+    'https://generativelanguage.googleapis.com/v1beta2/models/chat-bison-001:generateMessage?key=$apiKey',
+  );
   final response = await http.post(
     url,
     headers: {'Content-Type': 'application/json'},
-    body: jsonEncode({'userId': userId}),
+    body: jsonEncode({
+      'prompt': {
+        'context': 'You are Mudra Bot, an AI assistant for loan applications.',
+        'examples': [],
+        'messages': [
+          {'content': prompt},
+        ],
+      },
+    }),
   );
-  print('Token fetch response: ${response.statusCode} ${response.body}');
   if (response.statusCode == 200) {
     final data = jsonDecode(response.body);
-    print('Decoded response: $data');
-    return data['token'];
+    return data['candidates']?[0]?['content'] ?? 'No response.';
   } else {
-    print('Error: ${response.body}');
-    return null;
+    print('Gemini API error: ${response.body}');
+    return 'Error: Could not get response.';
   }
 }
 
@@ -34,86 +41,33 @@ class _SMSChatbotScreenState extends State<SMSChatbotScreen> {
   final TextEditingController _controller = TextEditingController();
   late stt.SpeechToText _speech;
   bool _isListening = false;
-  final ImagePicker _picker = ImagePicker();
-  late final StreamChatClient _client;
-  bool _loading = true;
+  bool _loading = false;
   String? _error;
-  Channel? _channel;
-  List<Message> _messages = [];
-
-  static const String fixedUserId = "2026";
+  List<Map<String, String>> _messages = [];
 
   @override
   void initState() {
     super.initState();
     _speech = stt.SpeechToText();
-    try {
-      _client = StreamChatClient('pc75euj8pznv', logLevel: Level.INFO);
-      print('StreamChatClient created');
-    } catch (e) {
-      print('Error creating StreamChatClient: $e');
-      _error = 'Error initializing chat client.';
-      _loading = false;
-    }
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _initializeChat(fixedUserId);
-  }
-
-  Future<void> _initializeChat(String userId) async {
-    setState(() {
-      _loading = true;
-      _error = null;
-    });
-    try {
-      final token = await getStreamToken(userId);
-      if (token != null) {
-        await _client.connectUser(User(id: userId, name: userId), token);
-        _channel = _client.channel(
-          'messaging',
-          id: 'mudra-bot',
-          extraData: {
-            'members': [userId, 'mudra-bot'],
-          },
-        );
-        await _channel!.watch();
-        await _loadMessages();
-        setState(() {
-          _loading = false;
-        });
-      } else {
-        print('Failed to fetch Stream token');
-        setState(() {
-          _error = 'Failed to fetch Stream token.';
-          _loading = false;
-        });
-      }
-    } catch (e) {
-      print('Error initializing chat: $e');
-      setState(() {
-        _error = 'Error initializing chat.';
-        _loading = false;
-      });
-    }
-  }
-
-  Future<void> _loadMessages() async {
-    if (_channel != null) {
-      final res = await _channel!.query();
-      setState(() {
-        _messages = res.messages ?? [];
-      });
-    }
   }
 
   void _sendMessage(String text) async {
-    if (text.trim().isEmpty || _channel == null) return;
-    await _channel!.sendMessage(Message(text: text));
+    if (text.trim().isEmpty) return;
+    setState(() {
+      _messages.add({'role': 'user', 'content': text});
+      _loading = true;
+    });
     _controller.clear();
-    _loadMessages();
+    final aiResponse = await getGeminiResponse(text);
+    setState(() {
+      _messages.add({'role': 'ai', 'content': aiResponse});
+      _loading = false;
+    });
   }
 
   void _listen() async {
@@ -136,24 +90,7 @@ class _SMSChatbotScreenState extends State<SMSChatbotScreen> {
   }
 
   Future<void> _pickMedia() async {
-    final XFile? file = await _picker.pickImage(source: ImageSource.gallery);
-    if (file != null && _channel != null) {
-      final imageUrl =
-          'https://via.placeholder.com/180'; // Replace with uploaded image URL later
-      await _channel!.sendMessage(
-        Message(
-          text: '[Image]',
-          attachments: [
-            Attachment(
-              type: AttachmentType.image,
-              imageUrl: imageUrl,
-              title: file.name,
-            ),
-          ],
-        ),
-      );
-      _loadMessages();
-    }
+    // Optionally implement media upload to Gemini or remove this function
   }
 
   @override
@@ -187,24 +124,7 @@ class _SMSChatbotScreenState extends State<SMSChatbotScreen> {
                       itemCount: _messages.length,
                       itemBuilder: (context, idx) {
                         final msg = _messages[idx];
-                        final isUser = msg.user?.id == fixedUserId;
-                        if (msg.attachments.isNotEmpty &&
-                            msg.attachments.first.type == 'image') {
-                          return Align(
-                            alignment: isUser
-                                ? Alignment.centerRight
-                                : Alignment.centerLeft,
-                            child: Container(
-                              margin: EdgeInsets.symmetric(vertical: 4),
-                              child: Image.network(
-                                msg.attachments.first.imageUrl ?? '',
-                                width: 180,
-                                height: 180,
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-                          );
-                        }
+                        final isUser = msg['role'] == 'user';
                         return Align(
                           alignment: isUser
                               ? Alignment.centerRight
@@ -222,7 +142,7 @@ class _SMSChatbotScreenState extends State<SMSChatbotScreen> {
                               borderRadius: BorderRadius.circular(16),
                             ),
                             child: Text(
-                              msg.text ?? '',
+                              msg['content'] ?? '',
                               style: TextStyle(fontSize: 16),
                             ),
                           ),

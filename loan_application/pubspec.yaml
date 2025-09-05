@@ -41,9 +41,6 @@ dependencies:
   image_picker: ^1.0.7
   local_auth: ^2.1.7
   speech_to_text: ^7.3.0
-  stream_chat: ^9.16.0
-  stream_chat_flutter: ^9.16.0
-  stream_chat_flutter_core: ^9.16.0
   http: ^1.1.0
 
 dev_dependencies:
