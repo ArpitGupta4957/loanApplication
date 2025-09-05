@@ -99,64 +99,197 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Login')),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              TextFormField(
-                decoration: InputDecoration(labelText: 'Mobile Number'),
-                keyboardType: TextInputType.phone,
-                onChanged: (v) => setState(() => mobile = v),
-              ),
-              SizedBox(height: 16),
-              if (!otpSent)
-                ElevatedButton(onPressed: _sendOtp, child: Text('Send OTP')),
-              if (otpSent && !otpVerified)
-                Column(
-                  children: [
-                    TextFormField(
-                      decoration: InputDecoration(labelText: 'Enter OTP'),
-                      keyboardType: TextInputType.number,
-                      onChanged: (v) => setState(() => otp = v),
-                    ),
-                    SizedBox(height: 8),
-                    ElevatedButton(
-                      onPressed: _verifyOtp,
-                      child: Text('Verify'),
-                    ),
-                  ],
-                ),
-              SizedBox(height: 16),
-              Text('Or use:'),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  IconButton(
-                    icon: Icon(Icons.fingerprint),
-                    onPressed: _authenticateWithFingerprint,
-                  ),
-                  IconButton(
-                    icon: Icon(Icons.face),
-                    onPressed: _authenticateWithFace,
-                  ),
-                ],
-              ),
-              SizedBox(height: 16),
-              TextButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => RegistrationScreen(),
-                    ),
-                  );
-                },
-                child: Text('Register as New User'),
-              ),
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Color(0xFF6A11CB),
+              Color(0xFF2575FC),
+              Color(0xFF43E97B),
+              Color(0xFFFF6A00),
             ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.account_circle, size: 80, color: Colors.white),
+                      SizedBox(height: 16),
+                      Text(
+                        'Welcome Back!',
+                        style: TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          shadows: [
+                            Shadow(
+                              blurRadius: 8,
+                              color: Colors.black26,
+                              offset: Offset(2, 2),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: 24),
+                      TextFormField(
+                        decoration: InputDecoration(
+                          prefixIcon: Icon(
+                            Icons.phone,
+                            color: Color(0xFF2575FC),
+                          ),
+                          labelText: 'Mobile Number',
+                          filled: true,
+                          fillColor: Colors.white.withOpacity(0.9),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                        ),
+                        keyboardType: TextInputType.phone,
+                        onChanged: (v) => setState(() => mobile = v),
+                      ),
+                      SizedBox(height: 16),
+                      if (!otpSent)
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton.icon(
+                            style: ElevatedButton.styleFrom(
+                              padding: EdgeInsets.symmetric(vertical: 14),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              backgroundColor: Color(0xFF2575FC),
+                              elevation: 6,
+                            ),
+                            icon: Icon(Icons.send, color: Colors.white),
+                            label: Text(
+                              'Send OTP',
+                              style: TextStyle(
+                                fontSize: 18,
+                                color: Colors.white,
+                              ),
+                            ),
+                            onPressed: _sendOtp,
+                          ),
+                        ),
+                      if (otpSent && !otpVerified)
+                        Column(
+                          children: [
+                            TextFormField(
+                              decoration: InputDecoration(
+                                prefixIcon: Icon(
+                                  Icons.lock,
+                                  color: Color(0xFF43E97B),
+                                ),
+                                labelText: 'Enter OTP',
+                                filled: true,
+                                fillColor: Colors.white.withOpacity(0.9),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                              ),
+                              keyboardType: TextInputType.number,
+                              onChanged: (v) => setState(() => otp = v),
+                            ),
+                            SizedBox(height: 8),
+                            SizedBox(
+                              width: double.infinity,
+                              child: ElevatedButton.icon(
+                                style: ElevatedButton.styleFrom(
+                                  padding: EdgeInsets.symmetric(vertical: 14),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  backgroundColor: Color(0xFF43E97B),
+                                  elevation: 6,
+                                ),
+                                icon: Icon(Icons.verified, color: Colors.white),
+                                label: Text(
+                                  'Verify',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                onPressed: _verifyOtp,
+                              ),
+                            ),
+                          ],
+                        ),
+                      SizedBox(height: 24),
+                      Text(
+                        'Or use:',
+                        style: TextStyle(color: Colors.white, fontSize: 16),
+                      ),
+                      SizedBox(height: 8),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          ElevatedButton.icon(
+                            style: ElevatedButton.styleFrom(
+                              shape: CircleBorder(),
+                              padding: EdgeInsets.all(16),
+                              backgroundColor: Color(0xFF6A11CB),
+                              elevation: 4,
+                            ),
+                            icon: Icon(
+                              Icons.fingerprint,
+                              color: Colors.white,
+                              size: 28,
+                            ),
+                            label: Text(''),
+                            onPressed: _authenticateWithFingerprint,
+                          ),
+                          SizedBox(width: 24),
+                          ElevatedButton.icon(
+                            style: ElevatedButton.styleFrom(
+                              shape: CircleBorder(),
+                              padding: EdgeInsets.all(16),
+                              backgroundColor: Color(0xFFFF6A00),
+                              elevation: 4,
+                            ),
+                            icon: Icon(
+                              Icons.face,
+                              color: Colors.white,
+                              size: 28,
+                            ),
+                            label: Text(''),
+                            onPressed: _authenticateWithFace,
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 24),
+                      TextButton.icon(
+                        style: TextButton.styleFrom(
+                          foregroundColor: Colors.white,
+                          textStyle: TextStyle(fontSize: 16),
+                        ),
+                        icon: Icon(Icons.person_add, color: Colors.white),
+                        label: Text('Register as New User'),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => RegistrationScreen(),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
           ),
         ),
       ),

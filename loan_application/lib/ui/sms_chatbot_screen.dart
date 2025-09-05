@@ -6,24 +6,29 @@ import 'dart:convert';
 Future<String> getGeminiResponse(String prompt) async {
   final apiKey = 'AIzaSyCw9higWfGushNfAULTpY_pB2LmWWQ4Uew';
   final url = Uri.parse(
-    'https://generativelanguage.googleapis.com/v1beta2/models/chat-bison-001:generateMessage?key=$apiKey',
+    'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent',
   );
   final response = await http.post(
     url,
-    headers: {'Content-Type': 'application/json'},
+    headers: {'Content-Type': 'application/json', 'X-goog-api-key': apiKey},
     body: jsonEncode({
-      'prompt': {
-        'context': 'You are Mudra Bot, an AI assistant for loan applications.',
-        'examples': [],
-        'messages': [
-          {'content': prompt},
-        ],
-      },
+      'contents': [
+        {
+          'parts': [
+            {'text': prompt},
+          ],
+        },
+      ],
     }),
   );
   if (response.statusCode == 200) {
     final data = jsonDecode(response.body);
-    return data['candidates']?[0]?['content'] ?? 'No response.';
+    try {
+      return data['candidates'][0]['content']['parts'][0]['text'] ??
+          'No response.';
+    } catch (e) {
+      return 'No response.';
+    }
   } else {
     print('Gemini API error: ${response.body}');
     return 'Error: Could not get response.';

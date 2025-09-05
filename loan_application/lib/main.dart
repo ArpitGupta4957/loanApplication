@@ -47,7 +47,7 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        title: Text('Welcome to Mudra AI'),
+        title: Text(''),
       ),
       body: Stack(
         children: [
