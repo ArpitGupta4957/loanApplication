@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 Future<String> getGeminiResponse(String prompt) async {
-  final apiKey = 'AIzaSyCw9higWfGushNfAULTpY_pB2LmWWQ4Uew';
+  final apiKey = 'EwaIzaSyCw9higWfGushNfAULTpY_pB2LmWWQ4U';
   final url = Uri.parse(
     'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent',
   );
